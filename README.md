@@ -37,7 +37,7 @@ A卡用户在windows系统上部署SD的主要参考教程为这一篇：https:/
    （1）文中提供的torch所携带的rocm版本为5.1.1，目前amd提供的最新版官方显卡驱动的rocm版本为5.3.x，版本不对应将会导致执行报错：“return torch._C._cuda_getDeviceCount() > 0
 False”；
 
-    (2）如要解决(1)中的问题，有两种方法：其一是保证本机的rocm版本为5.1.x；其二是使用如下命令安装nightly version（试验版）的pytorch：pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/rocm5.2/。
+   （2）如要解决（1）中的问题，有两种方法：其一是保证本机的rocm版本为5.1.x；其二是使用如下命令安装nightly version（试验版）的pytorch：pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/rocm5.2/。
    
    （3）使用amd自带的安装程序amdgpu-install安装rocm的，5.1.1版rocm对应的驱动程序版本为21.50；5.2.x对应的驱动程序版本为22.10，请视具体情况下载。
 
