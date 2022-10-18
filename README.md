@@ -32,26 +32,23 @@ A卡用户在windows系统上部署SD的主要参考教程为这一篇：https:/
 
 2. 按照教程第1部分的前三个步骤逐步执行；
 
-3. 在执行第四步（即下载torch、torchvision并执行launch.py安装启动主程序）前，请注意：
-   
-   （1）文中提供的torch所携带的rocm版本为5.1.1，目前amd提供的最新版官方显卡驱动的rocm版本为5.3.x，版本不对应将会导致执行报错：“return torch._C._cuda_getDeviceCount() > 0
-False”；
+3. 在执行第四步（即下载torch、torchvision并执行launch.py安装启动主程序）前，请注意显卡驱动中rocm的版本应高于torch中的版本，否则可能导致执行报错：“return torch._C._cuda_getDeviceCount() > 0 False“;。查看rocm版本（主要是HIP版本）的命令为：
 
-   （2）如要解决（1）中的问题，有两种方法：其一是保证本机的rocm版本为5.1.x；其二是使用如下命令安装nightly version（试验版）的pytorch：pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/rocm5.2/。
-   
-   （3）使用amd自带的安装程序amdgpu-install安装rocm的，5.1.1版rocm对应的驱动程序版本为21.50；5.2.x对应的驱动程序版本为22.10，请视具体情况下载。
+// hipconfig
+
+笔者使用rocm5.2版本搭配1.12版本torch，liunx版本为ubuntu 20.04，使用正常。
 
 4. 在执行launch.py安装主程序的过程中，可能出现的问题包括但不限于:
   
-    (1) 提示cuda核心错误（该错误有两种类型，前文提到的rocm版本不对应是其中的一种），此时需要按照报错提示，手动在launch.py的指定段落中添加跳过cuda认证的相关内容，请善用文本自带的搜索功能快速定位位置和添加内容；
+    (1) 提示cuda核心错误（该错误有两种类型，前文提到的rocm版本不对应是其中的一种），此时可以按照报错提示，手动在launch.py的指定段落中添加跳过cuda认证的相关内容，先行完成安装。但如果报错信息为：”ErrorNoBinaryForGpu: Unable to find code object for all current devices!"Aborted (core dumped)”。说明显卡可以被torch识别，rocm运行成功，此时建议在执行python3 ./launch.py --xxx --xxx的命令之前，添加如下内容：HSA_OVERRIDE_GFX_VERSION=10.3.0，该命令的目的在于将rdna2架构的独显伪装成代号为gfx1030的专业显卡。
    
-   （2）网络错误（如提示ssl认证不安全，或提示TLS握手失败等），一般都是由于网络不稳定所致，不是程序错误；
+   （2）网络错误（如提示ssl认证不安全，或提示TLS握手失败等），一般都是由于网络不稳定所致，不是程序错误。
    
    （3）torch、gfpgan安装速度慢，一般都是由于网速慢，文件大所导致，需要格外耐心等待。
    
-   （4）其他问题，如提示socks出现问题（使用socks代理加速时会出现），缺乏数据库（一般需要放在module文件夹下的规定位置），在安装过程中可能需要重复多次执行launch.py程序。
+   （4）其他问题，如提示socks出现问题（使用socks代理加速时会出现），缺乏数据库（一般需要放在module文件夹下的规定位置），在安装过程中可能需要重复多次执行launch.py程序。使用socks加速时，无法启动主程序，如果使用的是export命令构架的proxy，请使用unset命令清除。
   
-    此处需要格外注意的是，由于教程里将所有相关依赖都存放在了venv文件夹中，因此请勿在cmd命令提示符首端没有venv标识时执行launch.py，否则相关依赖与数据库将会被重新下载到默认的lib文件夹中，占用两次磁盘空间。
+    额外需要注意的是：由于教程里将所有相关依赖都存放在了venv文件夹中，因此请勿在cmd命令提示符首端没有venv标识时执行launch.py，否则相关依赖与数据库将会被重新下载到默认的lib文件夹中，占用两次磁盘空间。
 
 5. 如果顺利的话，执行到最后所可能碰到的问题会有三个，其一是前文所提到的因电脑rocm版本与torch适配的rocm版本不对应所导致的torch无法识别显卡问题；其二是因安装rocm时没有将执行用户分类进用户组（group）所导致的torch无法识别显卡问题（虽然我也不清楚原理是什么）；其三则是amd显卡未给予官方支持所导致的问题。
   
