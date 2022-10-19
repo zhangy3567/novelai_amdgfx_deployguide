@@ -59,6 +59,18 @@ A卡用户在windows系统上部署SD的主要参考教程为这一篇：https:/
    （3）第三种情况的具体提示内容为：“"hipErrorNoBinaryForGpu: Unable to find code object for all current devices!"Aborted (core dumped)”。此时应在执行python3 ./launch.py --xxx --xxx的命令之前，添加如下内容：HSA_OVERRIDE_GFX_VERSION=10.3.0，该命令的目的在于将rdna2架构的独显伪装成代号为gfx1030的专业显卡。
 
     在linux上的部署虽然稍显复杂，但体验相对而言也会好上许多。webui所提供各项微调、定制以及训练模型等功能也非colab版本可比的。但缺点在于其图像生成质量在我看来不及colab版本，且受到电脑性能影响较大。笔者使用笔记本6600M渲染多张照片，只要分辨率高于512*512，就会有爆掉8GB显存的风险。对于新手而言并不友好，各项指标都有较大的优化空间。
+    
+    更新：
+   
+    1. 在RDNA2显卡上，可以删除--precision full --no-half代码，以获得更好的显存性能节省;
+    2. 在AMD显卡上开启--medvram和--lowvram选项，可能会导致程序不稳定，建议最好不要开启;
+    3. Xformers等效率加速模块需要CUDA核心支持，AMD无法使用
+    RX6600M的效率大约为：512×512分辨率训练embedding，速度为1.4it/s，训练3000个step需要36分钟左右，此时显卡功耗会达到100w。
+    作为参考，RTX3080Ti在同分辨率下训练速度为4.1it/s，训练3000个step需要12分钟。
+    RX6600M单精度计算性能为8.77TFLOPS，半精度计算性能为17.55 TFLOPs；作为对比，RTX3080Ti非官方数据单精度与半精度计算性能均为34.10TFLOPS。
+    按单精度计算，RX6600M为RTX3080Ti的26%性能，按多精度计算，RX6600M为RTX3080Ti的51%性能，但实际RX6600M表现为RTX3080Ti的33%左右。
+    推测原因，可能是因为AMD显卡在未使用--precision full以及--no-half代码时，调用的是pytorch使用的autocast预设，而该预设来源于nvidia的apex技术，其核心在于可以利用显卡的半精度性能训练AI模型，使计算从单精度转变为自动混合精度（AMP），得益于AMD显卡较好的半精度性能，因此相关性能会得到一定提升。
+    整体来看，AMD显卡的性能似乎并未因优化而落于下风，但N卡在处理AI计算方面依旧存在较大raw perf优势。
 
 # 简单总结
 
